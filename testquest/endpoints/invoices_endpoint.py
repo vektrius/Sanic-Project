@@ -3,9 +3,9 @@ from sanic_ext.extensions.openapi import openapi
 from sanic_jwt import inject_user, protected
 from sqlalchemy import select
 
-from testquest.database.database import async_db_session
-from testquest.database.models import Invoice, scalars_to_json, User, Transaction
-from testquest.swagger.swagger_model import InvoicesOpenAPIModel, TransactionOpenAPIModel
+from database.database import async_db_session
+from database.models import Invoice, scalars_to_json, User, Transaction
+from swagger.swagger_model import InvoicesOpenAPIModel, TransactionOpenAPIModel
 
 invoices = Blueprint("invoices", url_prefix="/invoices")
 

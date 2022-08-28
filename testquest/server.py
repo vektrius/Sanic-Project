@@ -1,5 +1,5 @@
 
-from testquest.app import app
+from app import app
 import routes
 import exceptions
 if __name__ == '__main__':

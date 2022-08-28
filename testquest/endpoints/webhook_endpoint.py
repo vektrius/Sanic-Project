@@ -2,11 +2,11 @@ from Crypto.Hash import SHA1
 from sanic import Blueprint, json
 from sanic_ext import validate
 
-from testquest.app import SECRET_KEY
-from testquest.database.database import async_db_session
-from testquest.exceptions import HashException
-from testquest.database.models import Invoice, Transaction
-from testquest.validators import WebhookValidator
+from app import SECRET_KEY
+from database.database import async_db_session
+from exceptions import HashException
+from database.models import Invoice, Transaction
+from validators import WebhookValidator
 
 webhook = Blueprint("webhook", url_prefix='/payment')
 

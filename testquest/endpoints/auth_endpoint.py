@@ -6,12 +6,12 @@ from sanic_ext import validate
 from sanic_ext.extensions.openapi import openapi
 from sqlalchemy import select
 
-from testquest.app import SECRET_KEY
-from testquest.database.database import async_db_session
-from testquest.database.models import User
-from testquest.exceptions import HashException, ObjectNotFoundException
-from testquest.swagger.swagger_model import UserOpenAPIModel, UserRegistrationOpenAPIModel
-from testquest.validators import UserValidator
+from app import SECRET_KEY
+from database.database import async_db_session
+from database.models import User
+from exceptions import HashException, ObjectNotFoundException
+from swagger.swagger_model import UserOpenAPIModel, UserRegistrationOpenAPIModel
+from validators import UserValidator
 
 auth = Blueprint('auth', url_prefix="/auth")
 

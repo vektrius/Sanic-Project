@@ -4,8 +4,8 @@ from sanic_jwt.exceptions import AuthenticationFailed
 from sqlalchemy import Column, INTEGER, String, Boolean, update, select, Float, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
-from testquest.database.database import Base, async_db_session
-from testquest.exceptions import ObjectNotFoundException
+from database.database import Base, async_db_session
+from exceptions import ObjectNotFoundException
 
 
 class BaseModel(Base):

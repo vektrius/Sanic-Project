@@ -3,10 +3,10 @@ from sanic_ext.extensions.openapi import openapi
 from sanic_jwt import inject_user, protected
 from sqlalchemy import select
 
-from testquest.database.database import async_db_session
-from testquest.database.models import User, scalars_to_json, Invoice
-from testquest.exceptions import OnlyAdminException
-from testquest.swagger.swagger_model import UserOpenAPIModel, InvoicesOpenAPIModel
+from database.database import async_db_session
+from database.models import User, scalars_to_json, Invoice
+from exceptions import OnlyAdminException
+from swagger.swagger_model import UserOpenAPIModel, InvoicesOpenAPIModel
 
 admin = Blueprint("admin", url_prefix="/admin")
 

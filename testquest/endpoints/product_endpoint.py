@@ -5,11 +5,11 @@ from sanic_jwt import protected, inject_user
 from sqlalchemy import select, update
 from sqlalchemy.sql import Delete
 
-from testquest.database.database import async_db_session
-from testquest.database.models import Product, scalars_to_json, User, Invoice
-from testquest.exceptions import ObjectNotFoundException, NotEnoughBalance, OnlyAdminException
-from testquest.swagger.swagger_model import ProductOpenAPIModel, ProductOpenAPIBuyModel
-from testquest.validators import BuyProductValidator, ProductValidator, ProductUpdateValidator
+from database.database import async_db_session
+from database.models import Product, scalars_to_json, User, Invoice
+from exceptions import ObjectNotFoundException, NotEnoughBalance, OnlyAdminException
+from swagger.swagger_model import ProductOpenAPIModel, ProductOpenAPIBuyModel
+from validators import BuyProductValidator, ProductValidator, ProductUpdateValidator
 
 products = Blueprint("products", url_prefix="/product")
 

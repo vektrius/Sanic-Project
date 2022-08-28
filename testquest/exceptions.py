@@ -1,7 +1,7 @@
 from pydantic import ValidationError
 from sanic import json
 
-from testquest.app import app
+from app import app
 
 
 class OnlyAdminException(Exception):
