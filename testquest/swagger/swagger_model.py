@@ -6,6 +6,10 @@ class UserOpenAPIModel:
     password = openapi.Password(description="Password")
     is_active = openapi.Boolean(description="is active")
 
+class UserRegistrationOpenAPIModel:
+    username = openapi.String(description="Username")
+    password = openapi.Password(description="Password")
+
 class ProductOpenAPIModel:
     name = openapi.String(description="name")
     discription = openapi.String(description="discription")

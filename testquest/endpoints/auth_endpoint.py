@@ -10,7 +10,7 @@ from testquest.app import SECRET_KEY
 from testquest.database.database import async_db_session
 from testquest.database.models import User
 from testquest.exceptions import HashException, ObjectNotFoundException
-from testquest.swagger.swagger_model import UserOpenAPIModel
+from testquest.swagger.swagger_model import UserOpenAPIModel, UserRegistrationOpenAPIModel
 from testquest.validators import UserValidator
 
 auth = Blueprint('auth', url_prefix="/auth")
@@ -35,7 +35,7 @@ async def retrieve_user(request, user: ReceivedUser, *args, **kwargs):
 
 
 @auth.route("/registration", methods=["POST"])
-@openapi.body({"application/json": UserOpenAPIModel},
+@openapi.body({"application/json": UserRegistrationOpenAPIModel},
               description="Registration user",
               required=True, )
 @openapi.response(200,"url activate")
@@ -49,7 +49,7 @@ async def registration(request,body: UserValidator):
     async_db_session.add(user)
     await async_db_session.commit()
     user_hash = SHA256.new(f'{user.username}.{user.password}.{SECRET_KEY}'.encode()).hexdigest()
-    activate_url = f'/activate?hash={user_hash}&username={username}'
+    activate_url = f'/auth/activate?hash={user_hash}&username={username}'
     return text(f"Go to url {activate_url}")
 
 
@@ -59,7 +59,7 @@ async def activate(request):
     user_hash = request.args.get('hash', None)
     username = request.args.get('username', None)
 
-    user = _get_user_from_username(username)
+    user = await _get_user_from_username(username)
 
     true_user_hash = SHA256.new(f'{user.username}.{user.password}.{SECRET_KEY}'.encode()).hexdigest()
     if not true_user_hash == user_hash:
