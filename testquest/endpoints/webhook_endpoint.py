@@ -1,31 +1,28 @@
 from Crypto.Hash import SHA1
-from pydantic import ValidationError
 from sanic import Blueprint, json
+from sanic_ext import validate
 
 from testquest.app import SECRET_KEY
-from testquest.database import async_db_session
-from testquest.models import Invoice, Transaction
+from testquest.database.database import async_db_session
+from testquest.exceptions import HashException
+from testquest.database.models import Invoice, Transaction
 from testquest.validators import WebhookValidator
 
 webhook = Blueprint("webhook", url_prefix='/payment')
 
 
 @webhook.route("/webhook", methods=["POST"])
-async def payment(request):
-    try:
-        data = WebhookValidator.parse_obj(request.json)
-    except ValidationError as e:
-        return e.json()
-
-    signature = data.signature
-    transaction_id = data.transaction_id
-    user_id = data.user_id
-    invoice_id = data.invoice_id
-    amount = data.amount
+@validate(json=WebhookValidator)
+async def payment(request,body: WebhookValidator):
+    signature = body.signature
+    transaction_id = body.transaction_id
+    user_id = body.user_id
+    invoice_id = body.invoice_id
+    amount = body.amount
 
     if not await _check_signature(signature, transaction_id,
                                   user_id, invoice_id, amount):
-        return Exception("Error Signature")
+        return HashException
 
     invoice = await _payment_to_invoice(user_id, invoice_id, transaction_id, amount)
     return json(invoice.to_dict())

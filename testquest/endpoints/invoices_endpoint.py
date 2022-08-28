@@ -1,14 +1,18 @@
 from sanic import Blueprint, Request, HTTPResponse
+from sanic_ext.extensions.openapi import openapi
 from sanic_jwt import inject_user, protected
 from sqlalchemy import select
 
-from testquest.database import async_db_session
-from testquest.models import Invoice, scalars_to_json, User, Transaction
+from testquest.database.database import async_db_session
+from testquest.database.models import Invoice, scalars_to_json, User, Transaction
+from testquest.swagger.swagger_model import InvoicesOpenAPIModel, TransactionOpenAPIModel
 
 invoices = Blueprint("invoices", url_prefix="/invoices")
 
 
 @invoices.route("/", methods=["GET"])
+@openapi.response(200,[InvoicesOpenAPIModel])
+@openapi.summary("Get invoices list")
 @inject_user()
 @protected()
 async def invoices_list(request: Request, user: User) -> HTTPResponse:
@@ -21,6 +25,8 @@ async def invoices_list(request: Request, user: User) -> HTTPResponse:
 
 
 @invoices.route("/<invoice_id:int>/transaction")
+@openapi.response(200,[TransactionOpenAPIModel])
+@openapi.summary("Get transaction list")
 @inject_user()
 @protected()
 async def transaction_list(request: Request, user: User, invoice_id: int) -> HTTPResponse:

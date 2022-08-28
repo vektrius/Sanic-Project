@@ -1,11 +1,11 @@
-from Crypto.Hash import SHA1, SHA256
+from Crypto.Hash import SHA1
 from sanic import json
 from sanic_jwt.exceptions import AuthenticationFailed
-from sqlalchemy import Column, Integer, String, Boolean, INTEGER, ForeignKey, Float, select, update
+from sqlalchemy import Column, INTEGER, String, Boolean, update, select, Float, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 
-from testquest.app import SECRET_KEY
-from testquest.database import Base, async_db_session
+from testquest.database.database import Base, async_db_session
+from testquest.exceptions import ObjectNotFoundException
 
 
 class BaseModel(Base):
@@ -29,27 +29,20 @@ class User(BaseModel):
         return {
             'user_id': self.id,
             'username': self.username,
+            'is_active': self.is_active
         }
 
     @classmethod
-    async def activate(cls, username, hash):
-
-        get_user_query = select(User).where(User.username == username)
-        results = await async_db_session.execute(get_user_query)
-        user = results.scalars().first()
-
+    async def is_active_set(cls, user, value: bool):
         if user is None:
-            raise Exception("User is note")
+            raise ObjectNotFoundException
 
-        current_user_hash = SHA256.new(f'{user.username}.{user.password}.{SECRET_KEY}'.encode()).hexdigest()
-
-        if current_user_hash == hash:
-            update_user_query = (
-                update(cls).where(User.id == user.id).values(is_active=True).execution_options(
-                    synchronize_session="fetch")
-            )
-            await async_db_session.execute(update_user_query)
-            await async_db_session.commit()
+        update_user_query = (
+            update(cls).where(User.id == user.id).values(is_active=value).execution_options(
+                synchronize_session="fetch")
+        )
+        await async_db_session.execute(update_user_query)
+        await async_db_session.commit()
 
     @classmethod
     async def authenticate(cls, username: str, password: str):
@@ -77,12 +70,13 @@ class Invoice(BaseModel):
 
     def to_dict(self):
         return {
-            'invoice_id' : self.id,
-            'amount' : self.amount,
-            'user_id' : self.user_id,
+            'invoice_id': self.id,
+            'amount': self.amount,
+            'user_id': self.user_id,
         }
+
     @classmethod
-    async def get_invoice_from_user(cls, invoice_id : int, user_id : int):
+    async def get_invoice_from_user(cls, invoice_id: int, user_id: int):
         get_invoice_query = (
             select(Invoice).where(Invoice.user_id == user_id, Invoice.id == invoice_id)
         )
@@ -90,17 +84,16 @@ class Invoice(BaseModel):
         invoice = scalars_invoices.first()
         return invoice
 
-    async def payment(self,amount,transaction_id):
-        write_off_invoice_query = (
-            update(Invoice).where(Invoice.id == self.id).values(amount=self.amount + amount).execution_options(
-                synchronize_session="fetch")
-        )
-        transaction = Transaction(id=transaction_id,invoices_id=self.id,amount=amount)
+    async def payment(self, amount, transaction_id):
+        # write_off_invoice_query = (
+        #     update(Invoice).where(Invoice.id == self.id).values(amount=self.amount + amount).execution_options(
+        #         synchronize_session="fetch")
+        # )
+        self.amount = amount + self.amount
+        transaction = Transaction(id=transaction_id, invoices_id=self.id, amount=amount)
 
         async_db_session.add(transaction)
-        await async_db_session.execute(write_off_invoice_query)
         await async_db_session.commit()
-        print('ok')
 
 
 class Product(BaseModel):
@@ -126,9 +119,10 @@ class Transaction(BaseModel):
 
     def to_dict(self):
         return {
-            'invoice_id' : self.invoices_id,
-            'amount' : self.amount
+            'invoice_id': self.invoices_id,
+            'amount': self.amount
         }
+
 
 def scalars_to_json(scalar_query):
     return json(list(map(lambda x: x.to_dict(), scalar_query.all())))

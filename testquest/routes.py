@@ -1,12 +1,12 @@
 from sanic import Blueprint
 from sanic_jwt import Initialize
 
-from testquest.admin_endpoint import admin
 from testquest.app import app, SECRET_KEY
-from testquest.auth_endpoint import auth, authenticate, retrieve_user
-from testquest.invoices import invoices
-from testquest.product_endpoint import products
-from testquest.webhook import webhook
+from testquest.endpoints.admin_endpoint import admin
+from testquest.endpoints.auth_endpoint import auth, authenticate, retrieve_user
+from testquest.endpoints.invoices_endpoint import invoices
+from testquest.endpoints.product_endpoint import products
+from testquest.endpoints.webhook_endpoint import webhook
 
 main_blueprint = Blueprint.group(products,auth,admin,webhook,invoices,url_prefix='')
 
@@ -20,6 +20,7 @@ Initialize(
 )
 
 app.blueprint(main_blueprint)
+
 
 def load_routes():
     print('Routes load!')
